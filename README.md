@@ -1,2 +1,2 @@
-# systools-rs
-A collection of small system-like tools build in rust 🙂
+# mini-tools
+A collection of small tools 🙂
