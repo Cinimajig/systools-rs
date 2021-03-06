@@ -1,6 +1,6 @@
 fn main() {
     windows::build!(
         windows::ui::notifications::*,
-        windows::data::xml::dom::*
+        windows::win32::windows_programming::{RegOpenKeyExW, RegSetValueExA, RegSetValueExW, RegCloseKey, HKEY, RegCreateKeyExW}
     );
 }

@@ -5,6 +5,13 @@ authors = ["Jacob Lund Mogensen <jacob.mogensen5@gmail.com>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "toaster"
+path = "src/toast/main.rs"
+required-features = []
+
+
 [profile.release]
 opt-level = 3
 lto = true
