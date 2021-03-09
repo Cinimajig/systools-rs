@@ -5,6 +5,7 @@ mod com_helper;
 #[path = "../../wstring.rs"]
 mod wstring;
 
+use clap::ArgMatches;
 use com_helper::InitCom;
 use windows::Interface;
 use windows::{
@@ -33,7 +34,7 @@ fn start(input: &clap::ArgMatches) -> windows::Result<()> {
     }
 
     if create_reg_keys(&current_file) {
-        let notification = construct_notification(input.value_of("IconPath"))?;
+        let notification = construct_notification(input)?;
 
         ToastNotificationManager::history()?.clear_with_id(current_file.clone())?;
 
@@ -95,13 +96,13 @@ fn create_reg_keys(file: &str) -> bool {
     result
 }
 
-fn construct_notification(input_image: Option<&str>) -> windows::Result<ToastNotification> {
+fn construct_notification(input: &ArgMatches) -> windows::Result<ToastNotification> {
     use std::fs;
     let image_tag;
 
     
 
-    if let Some(image_path) = input_image {
+    if let Some(image_path) = input.value_of("IconPath") {
         if Path::new(image_path).exists() {
             image_tag = format!(
                 "<image placement=\"appLogoOverride\" hint-crop=\"none\" src=\"{}\"/>",
@@ -125,12 +126,12 @@ fn construct_notification(input_image: Option<&str>) -> windows::Result<ToastNot
     }
 
     let args: Vec<String> = env::args().collect();
-    let text01 = match args.get(1) {
-        Some(s) => s.as_str(),
+    let text01 = match input.value_of("Headline") {
+        Some(s) => s,
         None => "Hello!",
     };
-    let text02 = match args.get(2) {
-        Some(s) => s.as_str(),
+    let text02 = match input.value_of("Text") {
+        Some(s) => s,
         None => "",
     };
 
