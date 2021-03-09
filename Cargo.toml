@@ -19,4 +19,5 @@ codegen-units = 1
 
 [dependencies]
 winrt = { path = "./bindings" }
+clap = { version = "2.33.3", default-features = false, features = ["suggestions", "vec_map"] }
 #wstring = { path = "./bindings/wstring" }
