@@ -7,6 +7,7 @@ mod wstring;
 
 use clap::ArgMatches;
 use com_helper::InitCom;
+use windows::win32::system_services::LSTATUS;
 use windows::Interface;
 use windows::{
     data::xml::dom::XmlDocument,
@@ -16,6 +17,8 @@ use winrt::windows;
 use wstring::WideString;
 
 use std::{env, path::Path};
+
+const ERROR_SUCCESS: LSTATUS = LSTATUS(0);
 const LAME_SUN: &[u8] = include_bytes!("../../../assets/lame_sun.png");
 
 fn start(input: &clap::ArgMatches) -> windows::Result<()> {
@@ -51,7 +54,6 @@ fn start(input: &clap::ArgMatches) -> windows::Result<()> {
 
 fn create_reg_keys(file: &str) -> bool {
     use std::{mem::transmute, ptr::null_mut};
-    use windows::win32::system_services::LSTATUS;
     use windows::win32::windows_programming::{RegCloseKey, RegCreateKeyExW, RegSetValueExA, HKEY};
 
     let mut result = false;
@@ -65,7 +67,6 @@ fn create_reg_keys(file: &str) -> bool {
         WideString::from_str(&path)
     };
     let mut hkey = HKEY(0);
-    let error_success = LSTATUS(0);
 
     unsafe {
         // Might need before hand? https://docs.microsoft.com/en-us/windows/win32/api/winreg/nf-winreg-regopencurrentuser
@@ -79,16 +80,16 @@ fn create_reg_keys(file: &str) -> bool {
             null_mut(),
             &mut hkey,
             null_mut(),
-        ) == error_success
+        ) == ERROR_SUCCESS
         {
             result = RegSetValueExA(
                 hkey,
-                b"ShowInActionCenter\0".as_ptr() as *const i8,
+                b"ShowInActionCenter\0".as_ptr().cast(),
                 0,
                 4,
                 transmute(&reg_value),
                 4,
-            ) == error_success;
+            ) == ERROR_SUCCESS;
             RegCloseKey(hkey);
         }
     }
@@ -99,8 +100,6 @@ fn create_reg_keys(file: &str) -> bool {
 fn construct_notification(input: &ArgMatches) -> windows::Result<ToastNotification> {
     use std::fs;
     let image_tag;
-
-    
 
     if let Some(image_path) = input.value_of("IconPath") {
         if Path::new(image_path).exists() {
@@ -125,7 +124,6 @@ fn construct_notification(input: &ArgMatches) -> windows::Result<ToastNotificati
         );
     }
 
-    let args: Vec<String> = env::args().collect();
     let text01 = match input.value_of("Headline") {
         Some(s) => s,
         None => "Hello!",
@@ -137,7 +135,6 @@ fn construct_notification(input: &ArgMatches) -> windows::Result<ToastNotificati
 
     let notification = {
         let xml = XmlDocument::new()?;
-
         let xml_text = format!(
             r#"
 <toast scenario="reminder" launch="developer-pre-defined-string">
@@ -155,13 +152,10 @@ fn construct_notification(input: &ArgMatches) -> windows::Result<ToastNotificati
         );
 
         xml.load_xml(xml_text)?;
-
-        println!("{}", xml.get_xml()?);
-
-        ToastNotification::create_toast_notification(xml)?
+        ToastNotification::create_toast_notification(xml)
     };
 
-    Ok(notification)
+    notification
 }
 
 fn get_cli_inputs() -> clap::ArgMatches<'static> {
@@ -217,7 +211,7 @@ fn get_exe_path() -> String {
     match env::current_exe() {
         Ok(path) => path
             .to_str()
-            .unwrap_or(r"{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\notepad.exe")
+            .unwrap_or(r"{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\cmd.exe")
             .to_string(),
         Err(_) => env::args().nth(0).unwrap(),
     } //{6D809377-6AF0-444B-8957-A3773F02200E}
