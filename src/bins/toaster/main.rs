@@ -17,6 +17,7 @@ use wstring::WideString;
 
 use std::{env, path::Path};
 
+const VERSION: &str = "0.1";
 const ERROR_SUCCESS: LSTATUS = LSTATUS(0);
 const LAME_SUN: &[u8] = include_bytes!("../../../assets/lame_sun.png");
 
@@ -163,7 +164,7 @@ fn construct_notification(input: &ArgMatches) -> windows::Result<ToastNotificati
 fn get_cli_inputs() -> clap::ArgMatches<'static> {
     use clap::clap_app;
     clap_app!(Toaster =>
-        (version: "1.0")
+        (version: VERSION)
         (about: "An easy way to display Toast notifications\n\nNOTE: It can fail the first time, if the start menu is not updated")
         (@arg Headline: -h --headline +takes_value "Sets the headline of the Toast")
         (@arg Text: -t --text +takes_value "Sets the message of the Toast")
